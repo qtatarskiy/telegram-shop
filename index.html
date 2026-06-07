@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothes Shop Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased select-none">
+
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+        <h1 class="text-lg font-black tracking-wider text-gray-900">TERAZOR SHOP</h1>
+        <span class="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Каталог</span>
+    </header>
+
+    <main class="p-4 pb-24">
+        <p class="text-xs text-gray-500 mb-4">Выберите товар и нажмите кнопку для заказа в чате</p>
+
+        <div id="catalog" class="grid grid-cols-2 gap-3">
+            </div>
+    </main>
+
+    <script>
+        // Инициализируем Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширяем окно на весь экран телефона
+
+        // ==========================================
+        // ВАШ АССОРТИМЕНТ (РЕДАКТИРУЙТЕ ЕГО ПРЯМО ТУТ)
+        // ==========================================
+        const products = [
+            {
+                id: 1,
+                title: "Оверсайз худи Black",
+                price: 3990,
+                image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400",
+                desc: "Плотный футер 3-нитка с начесом. Унисекс."
+            },
+            {
+                id: 2,
+                title: "Базовая футболка White",
+                price: 1990,
+                image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400",
+                desc: "Хлопок 100%, премиум качество, свободный крой."
+            },
+            {
+                id: 3,
+                title: "Спортивные штаны Grey",
+                price: 3490,
+                image: "https://images.unsplash.com/photo-1551854838-212c50b4c184?w=400",
+                desc: "Идеально сочетаются с оверсайз худи."
+            }
+        ];
+
+        // Отрисовка товаров на странице
+        const catalogContainer = document.getElementById('catalog');
+
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.className = "bg-white p-3 rounded-xl border border-gray-100 shadow-xs flex flex-col justify-between active:scale-98 transition-transform";
+            card.onclick = () => selectProduct(product);
+
+            card.innerHTML = `
+                <div>
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                        <img src="${product.image}" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xs font-semibold text-gray-800 mt-2 line-clamp-2">${product.title}</h3>
+                    <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${product.desc}</p>
+                </div>
+                <div class="mt-2 flex items-center justify-between">
+                    <span class="text-xs font-bold text-gray-950">${product.price} ₽</span>
+                    <span class="text-[10px] bg-gray-100 text-gray-700 px-2 py-1 rounded-md font-medium">Заказать</span>
+                </div>
+            `;
+            catalogContainer.appendChild(card);
+        });
+
+        // Функция при клике на товар
+        function selectProduct(product) {
+            // Показываем главную нижнюю кнопку Telegram
+            tg.MainButton.text = `Купить ${product.title} за ${product.price} ₽`;
+            tg.MainButton.textColor = "#FFFFFF";
+            tg.MainButton.color = "#000000"; // Черная стильная кнопка
+            tg.MainButton.show();
+
+            // Действие при клике на главную кнопку Telegram
+            tg.MainButton.onClick(() => {
+                // Отправляем данные обратно боту в чат
+                const messageData = {
+                    action: "order",
+                    product_title: product.title,
+                    price: product.price
+                };
+                tg.sendData(JSON.stringify(messageData));
+                tg.close(); // Закрываем мини-приложение
+            });
+        }
+    </script>
+</body>
+</html>
