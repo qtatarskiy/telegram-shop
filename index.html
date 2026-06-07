@@ -17,21 +17,17 @@
     <main class="p-4 pb-24">
         <p class="text-xs text-gray-500 mb-4">Выберите товар и нажмите кнопку для заказа в чате</p>
 
-        <div id="catalog" class="grid grid-cols-2 gap-3">
-            </div>
+        <div id="catalog" class="grid grid-cols-2 gap-3"></div>
     </main>
 
     <script>
-        // Инициализируем Telegram Web App
+        // Инициализация WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем окно на весь экран телефона
+        tg.expand();
 
-        // Переменная для хранения выбранного в данный момент товара
         let currentProduct = null;
 
-        // ==========================================
-        // ВАШ АССОРТИМЕНТ (МОЖНО РЕДАКТИРОВАТЬ ПРЯМО ТУТ)
-        // ==========================================
+        // Список товаров
         const products = [
             {
                 id: 1,
@@ -56,18 +52,17 @@
             }
         ];
 
-        // Отрисовка товаров на странице
         const catalogContainer = document.getElementById('catalog');
 
+        // Генерация карточек
         products.forEach(product => {
             const card = document.createElement('div');
             card.className = "bg-white p-3 rounded-xl border border-gray-100 flex flex-col justify-between active:scale-95 transition-transform cursor-pointer shadow-sm";
-            card.onclick = () => selectProduct(product);
-
+            
             card.innerHTML = `
                 <div>
                     <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <img src="${product.image}" class="w-full h-full object-cover">
+                        <img src="${product.image}" class="w-full h-full object-cover" alt="">
                     </div>
                     <h3 class="text-xs font-semibold text-gray-800 mt-2 h-8 line-clamp-2">${product.title}</h3>
                     <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${product.desc}</p>
@@ -77,11 +72,20 @@
                     <span class="text-[10px] bg-gray-100 text-gray-700 px-2 py-1 rounded-md font-medium">Заказать</span>
                 </div>
             `;
+            
+            card.onclick = () => {
+                currentProduct = product;
+                tg.MainButton.text = "Купить " + product.title + " за " + product.price + " ₽";
+                tg.MainButton.textColor = "#FFFFFF";
+                tg.MainButton.color = "#000000";
+                tg.MainButton.show();
+            };
+            
             catalogContainer.appendChild(card);
         });
 
-        // Функция обработки отправки данных при клике на Главную кнопку TG
-        function handleMainButtonClick() {
+        // Клик по главной кнопке Telegram
+        tg.MainButton.onClick(function() {
             if (currentProduct) {
                 const messageData = {
                     action: "order",
@@ -89,23 +93,9 @@
                     price: currentProduct.price
                 };
                 tg.sendData(JSON.stringify(messageData));
-                tg.close(); // Закрываем мини-приложение после заказа
+                tg.close();
             }
-        }
-
-        // Регистрируем событие один раз, чтобы избежать дублирования кликов
-        tg.MainButton.onClick(handleMainButtonClick);
-
-        // Функция при выборе товара
-        function selectProduct(product) {
-            currentProduct = product; // Запоминаем текущий выбранный товар
-
-            // Показываем и настраиваем главную нижнюю кнопку Telegram
-            tg.MainButton.text = `Купить ${product.title} за ${product.price} ₽`;
-            tg.MainButton.textColor = "#FFFFFF";
-            tg.MainButton.color = "#000000"; // Стильный черный цвет кнопки
-            tg.MainButton.show();
-        }
+        });
     </script>
 </body>
 </html>
